@@ -1,7 +1,10 @@
 <?php
 //connexion a la bdd
-$pdo = new PDO('mysql:host=127.0.0.1;dbname=micro_blog', 'root', '');
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+try{
+	$pdo = new PDO('mysql:host=localhost;dbname=micro_blog_soltysiak_samuel', 'root', '');
+}catch (PDOException $e){
+	echo 'Connexion échouée : ' . $e->getMessage();
+}
 
 
 //si le cookie existe, on récupére les informations de l'utilisateurs en fonction de son sid et on crée la variable $pseudo
