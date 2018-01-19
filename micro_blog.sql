@@ -38,8 +38,6 @@ INSERT INTO `messages` (`id`, `contenu`, `date`, `id_utilisateurs`) VALUES
 (82, 'Test quatre', 1516009604, 1),
 (89, 'Didier champignon', 1515868792, 1),
 (88, 'champignon', 1516012253, 2);
-(1, 'Test de nouveaux messages', 1516012506, 1);
-
 -- --------------------------------------------------------
 
 --
@@ -65,7 +63,7 @@ INSERT INTO `utilisateurs` (`id`, `nom`, `prenom`, `email`, `mdp`, `pseudo`, `si
 (2, '', '', 'samuel@hotmail.fr', 'e3e84538a1b02b1cc11bf71fe3169958', 'Soltysiak Samuel', 'bf838ff78991ad855de688b3c59bc679'),
 (3, 'Truman', 'Forest', 'truman.show@hotmail.fr', 'f1067e7173c7b9e6714ec7c88cf04bb1', 'Gump', '0546c4ff2196cfd7c9dc31c9da804f11'),
 (4, 'Zeckaria', 'HS', 'zac@hotmail.fr', 'ab4f63f9ac65152575886860dde480a1', 'Mamy', '46158fd54c6ebaa4a4b2e41b0c42336d'),
-(5, 'Doudoux', 't', '', 'd41d8cd98f00b204e9800998ecf8427e', '', NULL),
+(5, 'Doudoux', 't', '', 'd41d8cd98f00b204e9800998ecf8427e', '', NULL);
 --
 -- Index pour les tables exportées
 --
