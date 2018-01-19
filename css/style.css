@@ -1,0 +1,39 @@
+#buttonConnexion{
+	cursor:pointer;
+}
+#buttonInscription{
+	cursor:pointer;
+}
+.icone {
+    display: inline-block;
+    width:48px;
+    height: 48px;
+    background-image: url('../img/redes.png');
+}
+
+.facebook{
+    background-position: -48px -96px;
+}
+
+.facebook:hover{
+    background-position: -48px -48px;
+}
+
+.twitter{
+    background-position: -144px -96px;
+}
+
+.twitter:hover{
+    background-position: -144px -48px;
+}
+
+.vote {
+    margin-top:auto;
+    margin-bottom:auto;
+    font-size:1.5em;
+    margin-right:20px;
+}
+
+.voteup:hover {
+    cursor:pointer ;
+}

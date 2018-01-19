@@ -1,104 +1,96 @@
-<!DOCTYPE html>
-<html lang="fr">
 
-<head>
+<?php
+include('includes/connexion.inc.php');
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>Micro blog</title>
-
-    <!-- Bootstrap Core CSS -->
-    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Theme CSS -->
-    <link href="css/freelancer.css" rel="stylesheet">
-
-    <!-- Custom Fonts -->
-    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-</head>
-
-<body id="page-top" class="index">
-
-    <?php include('includes/haut.inc.php'); ?>
-    
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="intro-text">
-                        <span class="name">Le fil</span>
-                        <hr class="star-light">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- About Section -->
-    <section>
-        <div class="container">
-            <div class="row">              
-                <form method="post" action="php/updateMsg.php?a=add">
-                    <div class="col-sm-10">
-                        <div class="form-group">
-                            <textarea id="message" name="message" class="form-control" placeholder="Message"></textarea>
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <button type="submit" class="btn btn-success btn-lg">Envoyer</button>
-                    </div>
-                </form>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-12">
-
-                    <?php include('includes/messages.inc.php'); ?>
-
-                </div>
-            </div>
-        </div>
-    </section>
+// NOTE: Smarty has a capital 'S'
+require_once('libs/Smarty.class.php');
+$smarty = new Smarty();
 
 
-    <?php include('includes/bas.inc.php'); ?>
+if(isset($_GET['id']) && !empty($_GET['id'])){
+	$smarty->assign('id', $_GET['id']);
+	$query='SELECT contenu FROM messages WHERE id='.$_GET['id'];
+	$stmt=$pdo->query($query);
+	while($data=$stmt->fetch()){
+		$smarty->assign('contenu', $data['contenu']);
+	}
+}
 
-    <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
-    <div class="scroll-top page-scroll hidden-sm hidden-xs hidden-lg hidden-md">
-        <a class="btn btn-primary" href="#page-top">
-            <i class="fa fa-chevron-up"></i>
-        </a>
-    </div>
+$mpp=4;
 
-    <!-- jQuery -->
-    <script src="vendor/jquery/jquery.min.js"></script>
+//Requete permettant de recuperer les messages pour le contenu recherché, et d'en afficher que 4 par page
+if(isset($_GET['page']) && isset($_GET['contenu'])){
+    	$query = 'SELECT contenu, messages.id AS idMessage, pseudo, date , votes
+	FROM messages 
+	INNER JOIN utilisateurs ON messages.id_utilisateurs=utilisateurs.id 
+	WHERE contenu LIKE "%'.$_GET['contenu'].'%"
+	OR pseudo LIKE "%'.$_GET['contenu'].'%"
+	ORDER BY date DESC 
+	LIMIT '.($_GET['page']*$mpp-$mpp).','.$mpp;
+}
+else if(!isset($_GET['page']) && isset($_GET['contenu'])){
+    	$query = 'SELECT contenu, messages.id AS idMessage, pseudo, date, votes 
+	FROM messages 
+	INNER JOIN utilisateurs ON messages.id_utilisateurs=utilisateurs.id 
+	WHERE contenu LIKE "%'.$_GET['contenu'].'%"
+	OR pseudo LIKE "%'.$_GET['contenu'].'%"
+	ORDER BY date DESC LIMIT 0,'.$mpp;
+}
+else if(isset($_GET['page'])){
+	$query = 'SELECT contenu, messages.id AS idMessage, pseudo, date, votes 
+	FROM messages 
+	INNER JOIN utilisateurs ON messages.id_utilisateurs=utilisateurs.id 
+	ORDER BY date DESC 
+	LIMIT '.($_GET['page']*$mpp-$mpp).','.$mpp;
+}
+else{
+	$query = 'SELECT contenu, messages.id AS idMessage, pseudo, date, votes 
+	FROM messages 
+	INNER JOIN utilisateurs ON messages.id_utilisateurs=utilisateurs.id 
+	ORDER BY date DESC LIMIT 0,'.$mpp;
+}
+$stmt = $pdo->query($query);
 
-    <!-- Bootstrap Core JavaScript -->
-    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+$list_contenu=array();
+$i=0;
 
-    <!-- Plugin JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+while($data=$stmt->fetch()){
+    $contenu = $data['contenu'];
+    $pattern = array('/https?:\/\/[a-zA-Z0-9\-\.]+\.[a-z]+\/?/', '/S*#([\w]+\S*)/', '/[0-9a-z-_.]+\@[0-9a-z.]+\.[a-z]+/');
+    $matches= array('<a href="$0">$0</a>', '<a href="index.php?contenu=$1">$0</a>', '<a href="mailto:$0">$0</a>');
+	$list_contenu[$i]['contenu'] = preg_replace($pattern, $matches, $contenu);
+    $list_contenu[$i]['votes'] = $data['votes'];
+	$list_contenu[$i]['idMessage'] = $data['idMessage'];
+	$list_contenu[$i]['pseudo'] = $data['pseudo'];
+	$list_contenu[$i]['date'] = date("d/m/Y H:i:s", $data['date']);
+	$i++;
+}
 
-    <!-- Theme JavaScript -->
-    <script src="js/freelancer.min.js"></script>
-		
-		
-    <script src="js/editMsg.js"></script>
+$smarty->assign('list_contenu', $list_contenu);
 
-</body>
 
-</html>
+//on recupere le nombre de message afin de calculer le nombre de pages
+if(isset($_GET['contenu'])){
+    $query = 'SELECT count(messages.id) AS nbreId FROM messages INNER JOIN utilisateurs ON messages.id_utilisateurs=utilisateurs.id  WHERE contenu LIKE "%'.$_GET['contenu'].'%" 
+	OR pseudo LIKE "%'.$_GET['contenu'].'%"';
+}else{
+    $query = 'SELECT count(id) AS nbreId FROM messages';
+}
+$stmt=$pdo->query($query);
+while ($data = $stmt->fetch()) {
+	
+	$nbreMessages=$data['nbreId'];
+}
+
+
+$nbrePages=($nbreMessages) ? ceil($nbreMessages/$mpp) : 1;
+$smarty->assign('nbrePages', $nbrePages);
+$smarty->assign('nbreMessages', $nbreMessages);
+$smarty->assign('pseudo', $pseudo);
+$smarty->assign('mpp', 4);
+
+$smarty->display('index.tpl');
+
+?>
+
+
